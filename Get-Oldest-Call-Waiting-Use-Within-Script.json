@@ -1,0 +1,63 @@
+{
+  "name": "Get Oldest Call Waiting",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/analytics/conversations/details/query",
+      "requestType": "POST",
+      "headers": {
+      	"Content-Type": "application/json"
+      },
+      "requestTemplate": "{\n\t \"interval\": \"${input.INTERVAL}\",\n\t \"order\": \"asc\",\n\t \"orderBy\": \"conversationStart\",\n\t \"paging\": {\n\t  \"pageSize\": 25,\n\t  \"pageNumber\": 1\n\t },\n\t \"segmentFilters\": [\n\t  {\n\t   \"type\": \"and\",\n\t   \"predicates\": [\n\t    {\n\t     \"type\": \"dimension\",\n\t     \"dimension\": \"queueId\",\n\t     \"operator\": \"matches\",\n\t     \"value\": \"${input.QUEUE_ID}\"\n\t    },\n\t   \t{\n\t     \"type\": \"dimension\",\n\t     \"dimension\": \"userId\",\n\t     \"operator\": \"notExists\",\n\t     \"value\": null\n\t    }\n\t   ]\n\t  }\n\t ],\n\t \"conversationFilters\": [\n\t  {\n\t   \"type\": \"and\",\n\t   \"predicates\": [\n\t    {\n\t     \"type\": \"dimension\",\n\t     \"dimension\": \"conversationEnd\",\n\t     \"operator\": \"notExists\",\n\t     \"value\": null\n\t    }\n\t   ]\n\t  }\n\t ]\n}"
+    },
+    "response": {
+      "translationMap": {
+        "OLDEST_CALL_WAITING": "$.conversations[0].conversationStart"
+      },
+      "translationMapDefaults": {
+        "OLDEST_CALL_WAITING": "null"
+      },
+      "successTemplate": "{\n   \"OLDEST_CALL_WAITING\": ${OLDEST_CALL_WAITING}\n }"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Oldest Call Waiting",
+        "description": "The oldest call waiting for a queue.",
+        "type": "object",
+        "required": [
+          "QUEUE_ID",
+          "INTERVAL"
+        ],
+        "properties": {
+          "QUEUE_ID": {
+            "description": "The queue ID.",
+            "type": "string"
+          },
+          "INTERVAL": {
+            "description": "The interval",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "output": {
+      "successSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Oldest Call Waiting",
+        "description": "Returns the oldest call waiting",
+        "type": "object",
+        "properties": {
+          "OLDEST_CALL_WAITING": {
+            "description": "oldest call waiting in the queue",
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "secure": false
+}
